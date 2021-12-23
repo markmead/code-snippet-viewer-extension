@@ -1,0 +1,11 @@
+{
+  "name": "Code Snippet Viewer",
+  "action": {},
+  "manifest_version": 3,
+  "version": "0.1",
+  "description": "Instantly view all the code snippets within a development blog post.",
+  "permissions": ["activeTab", "scripting"],
+  "background": {
+    "service_worker": "background.js"
+  }
+}
