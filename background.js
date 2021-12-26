@@ -16,17 +16,21 @@ function createSnippets() {
 
   const backgroundColor = [
     getColor(firstPreEl, "background-color"),
-    getColor(firstPreEl.parentElement, "background-color"),
+    getColor(firstPreEl?.parentElement, "background-color"),
     getColor(document.body, "background-color"),
   ].find((color) => color !== "rgba(0, 0, 0, 0)");
 
   const textColor = [
     getColor(firstPreEl, "color"),
-    getColor(firstPreEl.parentElement, "color"),
+    getColor(firstPreEl?.parentElement, "color"),
     getColor(document.body, "color"),
   ].find((color) => color !== "rgba(0, 0, 0, 0)");
 
-  const preStyle = `padding: 1rem;border-radius: 1rem;width:100%;overflow:auto;border: 1px solid ${textColor};`;
+  const borderColor = textColor.replace("rgb", "rgba").replace(")", ", 0.2)");
+
+  const preStyle = `
+    padding: 1rem;border-radius: 0.5rem;width:100%;overflow:auto;box-sizing:border-box;border: 1px solid ${borderColor};
+  `;
 
   modalEl = document.createElement("div");
   modalEl.appendChild(modalInnerEl);
@@ -55,11 +59,12 @@ function createSnippets() {
   const modalInnerStyle = {
     "grid-template-columns": "1fr",
     "max-height": "calc(100vh - 4rem)",
-    "max-width": "72rem",
+    "max-width": "65ch",
     display: "grid",
     gap: "1rem",
     overflow: "auto",
     margin: "auto",
+    width: "100%",
   };
 
   modalEl.setAttribute(
@@ -80,6 +85,8 @@ function createSnippets() {
   document.body.appendChild(modalEl);
 
   function getColor(el, property) {
+    if (!el) return;
+
     return getComputedStyle(el).getPropertyValue(property);
   }
 }
