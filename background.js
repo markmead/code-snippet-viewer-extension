@@ -1,64 +1,65 @@
-function reddenPage() {
+function createSnippets() {
   let modalEl = document.getElementById("modal");
-
-  let preEls = [...document.getElementsByTagName("pre")].filter(
-    (el) => el.innerText.trim() !== ""
-  );
-  let firstPreEl = preEls[0];
-
-  let bodyBackgroundColor =
-    window
-      .getComputedStyle(document.body)
-      .getPropertyValue("background-color") || null;
-  let preBackgroundColor =
-    getComputedStyle(firstPreEl).getPropertyValue("background-color");
-  let preParentBackgroundColor = getComputedStyle(
-    firstPreEl.parentElement
-  ).getPropertyValue("background-color");
-  let backgroundColors = [
-    bodyBackgroundColor,
-    preBackgroundColor,
-    preParentBackgroundColor,
-  ];
-  let backgroundColor = backgroundColors.find(
-    (color) => color !== "rgba(0, 0, 0, 0)"
-  );
-
-  let bodyTextColor = window
-    .getComputedStyle(document.body)
-    .getPropertyValue("color");
-  let preTextColor = getComputedStyle(firstPreEl).getPropertyValue("color");
-  let preParentTextColor = getComputedStyle(
-    firstPreEl.parentElement
-  ).getPropertyValue("color");
-  let textColors = [bodyTextColor, preTextColor, preParentTextColor];
-  let textColor = textColors.find((color) => color !== "rgb(0, 0, 0)");
 
   if (modalEl) {
     modalEl.remove();
     return;
   }
 
-  modalEl = document.createElement("div");
+  let modalInnerEl = document.createElement("div");
 
-  preEls.forEach((preEl) => {
-    modalEl.innerHTML += `<div>${preEl.outerHTML}</div>`;
-  });
+  const preEls = [...document.getElementsByTagName("pre")].filter(
+    (el) => el.innerText.trim() !== ""
+  );
+
+  const firstPreEl = preEls[0];
+
+  const backgroundColor = [
+    getColor(firstPreEl, "background-color"),
+    getColor(firstPreEl.parentElement, "background-color"),
+    getColor(document.body, "background-color"),
+  ].find((color) => color !== "rgba(0, 0, 0, 0)");
+
+  const textColor = [
+    getColor(firstPreEl, "color"),
+    getColor(firstPreEl.parentElement, "color"),
+    getColor(document.body, "color"),
+  ].find((color) => color !== "rgba(0, 0, 0, 0)");
+
+  const preStyle = `padding: 1rem;border-radius: 1rem;width:100%;overflow:auto;border: 1px solid ${textColor};`;
+
+  modalEl = document.createElement("div");
+  modalEl.appendChild(modalInnerEl);
+
+  preEls.forEach(
+    (preEl) =>
+      (modalInnerEl.innerHTML += `<div style="${preStyle}">${preEl.outerHTML}</div>`)
+  );
 
   const modalStyle = {
     "background-color": backgroundColor,
-    "grid-template-columns": "1fr",
+    "box-sizing": "border-box",
     "z-index": 99999,
-    display: "grid",
-    gap: "1rem",
+    color: textColor,
     height: "100vh",
     left: 0,
-    overflow: "auto",
-    padding: "10vh",
+    padding: "2rem",
     position: "fixed",
     top: 0,
     width: "100%",
-    color: textColor,
+    display: "flex",
+    "align-items": "center",
+    "justify-content": "center",
+  };
+
+  const modalInnerStyle = {
+    "grid-template-columns": "1fr",
+    "max-height": "calc(100vh - 4rem)",
+    "max-width": "72rem",
+    display: "grid",
+    gap: "1rem",
+    overflow: "auto",
+    margin: "auto",
   };
 
   modalEl.setAttribute(
@@ -68,13 +69,24 @@ function reddenPage() {
       .join(";")
   );
 
+  modalInnerEl.setAttribute(
+    "style",
+    Object.entries(modalInnerStyle)
+      .map(([key, value]) => `${key}: ${value}`)
+      .join(";")
+  );
+
   modalEl.id = "modal";
   document.body.appendChild(modalEl);
+
+  function getColor(el, property) {
+    return getComputedStyle(el).getPropertyValue(property);
+  }
 }
 
 chrome.action.onClicked.addListener((tab) => {
   chrome.scripting.executeScript({
     target: { tabId: tab.id },
-    function: reddenPage,
+    function: createSnippets,
   });
 });
